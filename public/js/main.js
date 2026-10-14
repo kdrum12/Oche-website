@@ -131,3 +131,173 @@ if (menuToggle && navLinks) {
     });
   });
 }
+
+// 5. Interactive Modal Management
+function openModal(modalId) {
+  const modal = document.querySelector(modalId);
+  if (modal) {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal(modal) {
+  if (modal) {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+document.querySelectorAll('[data-modal-target]').forEach(trigger => {
+  trigger.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = trigger.getAttribute('data-modal-target');
+    openModal(target);
+  });
+});
+
+document.querySelectorAll('.modal-close').forEach(closeBtn => {
+  closeBtn.addEventListener('click', () => {
+    closeModal(closeBtn.closest('.modal-backdrop'));
+  });
+});
+
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) {
+      closeModal(backdrop);
+    }
+  });
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-backdrop.open').forEach(closeModal);
+  }
+});
+
+// 6. Interactive Category Filter Tabs
+document.querySelectorAll('.filter-tabs .tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const parent = btn.closest('.filter-tabs');
+    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const filter = btn.getAttribute('data-filter');
+    const containerSelector = btn.getAttribute('data-target-container') || '.filterable-grid';
+    const container = document.querySelector(containerSelector);
+
+    if (container) {
+      const items = container.querySelectorAll('.filterable-card');
+      items.forEach(item => {
+        const itemCategory = item.getAttribute('data-category');
+        if (filter === 'all' || itemCategory === filter || (itemCategory && itemCategory.includes(filter))) {
+          item.style.display = '';
+          item.style.animation = 'fadeIn 0.35s ease forwards';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+  });
+});
+
+// 7. Interactive Accordions (FAQ & Details)
+document.querySelectorAll('.accordion-header').forEach(header => {
+  header.addEventListener('click', () => {
+    const item = header.closest('.accordion-item');
+    const isOpen = item.classList.contains('open');
+
+    // Optional: close other items in the same accordion
+    const parent = item.closest('.accordion');
+    if (parent) {
+      parent.querySelectorAll('.accordion-item').forEach(other => {
+        if (other !== item) other.classList.remove('open');
+      });
+    }
+
+    item.classList.toggle('open', !isOpen);
+  });
+});
+
+// 8. Interactive Giving Calculator
+const amountBtns = document.querySelectorAll('.amount-btn');
+const customAmountInput = document.getElementById('custom-amount');
+const donationHiddenAmount = document.getElementById('donation-amount-input');
+const freqBtns = document.querySelectorAll('.freq-btn');
+const freqHiddenInput = document.getElementById('donation-frequency-input');
+const summaryAmountEl = document.getElementById('summary-amount');
+const summaryFreqEl = document.getElementById('summary-frequency');
+
+if (amountBtns.length > 0 && customAmountInput) {
+  amountBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      amountBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const val = btn.getAttribute('data-amount');
+      customAmountInput.value = val;
+      if (donationHiddenAmount) donationHiddenAmount.value = val;
+      if (summaryAmountEl) summaryAmountEl.textContent = '$' + val;
+    });
+  });
+
+  customAmountInput.addEventListener('input', () => {
+    amountBtns.forEach(b => b.classList.remove('active'));
+    const val = customAmountInput.value || 0;
+    if (donationHiddenAmount) donationHiddenAmount.value = val;
+    if (summaryAmountEl) summaryAmountEl.textContent = '$' + val;
+  });
+}
+
+if (freqBtns.length > 0 && freqHiddenInput) {
+  freqBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      freqBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const freq = btn.getAttribute('data-freq');
+      freqHiddenInput.value = freq;
+      if (summaryFreqEl) {
+        summaryFreqEl.textContent = freq === 'monthly' ? 'monthly recurring' : 'one-time';
+      }
+    });
+  });
+}
+
+// 9. Sermon Player Modal Trigger
+document.querySelectorAll('.play-sermon-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const title = btn.getAttribute('data-title') || 'Featured Sermon';
+    const speaker = btn.getAttribute('data-speaker') || 'Faith Connect Ministry';
+    const date = btn.getAttribute('data-date') || 'Recent Message';
+    const scripture = btn.getAttribute('data-scripture') || '';
+
+    const modalTitle = document.getElementById('modal-sermon-title');
+    const modalSpeaker = document.getElementById('modal-sermon-speaker');
+    const modalDate = document.getElementById('modal-sermon-date');
+    const modalScripture = document.getElementById('modal-sermon-scripture');
+
+    if (modalTitle) modalTitle.textContent = title;
+    if (modalSpeaker) modalSpeaker.textContent = speaker;
+    if (modalDate) modalDate.textContent = date;
+    if (modalScripture) modalScripture.textContent = scripture;
+
+    openModal('#sermon-player-modal');
+  });
+});
+
+// 10. Event RSVP Modal Trigger
+document.querySelectorAll('.rsvp-event-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const eventTitle = btn.getAttribute('data-event-title') || '';
+    const inputTitle = document.getElementById('rsvp-event-title-input');
+    const displayTitle = document.getElementById('rsvp-modal-event-name');
+
+    if (inputTitle) inputTitle.value = eventTitle;
+    if (displayTitle) displayTitle.textContent = eventTitle;
+
+    openModal('#event-rsvp-modal');
+  });
+});
+
